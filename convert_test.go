@@ -11,7 +11,7 @@ import (
 )
 
 func TestConvertProof(t *testing.T) {
-	proof, err := generateRangeProof(6)
+	proof, err := generateRangeProof(200)
 	if err != nil {
 		t.Fatal(err)
 	}
