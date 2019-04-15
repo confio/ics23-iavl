@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/tendermint/iavl"
+	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/libs/db"
 )
 
@@ -48,20 +49,18 @@ func generateRangeProof(size int) (*provenValue, error) {
 	tree := iavl.NewMutableTree(db.NewMemDB(), 0)
 
 	// insert lots of info and store the bytes
-	/*
-		allkeys := make([][]byte, size)
-		for i := 0; i < size; i++ {
-			key := cmn.RandStr(20)
-			value := "value_for_" + key
-			tree.Set([]byte(key), []byte(value))
-			allkeys[i] = []byte(key)
-		}
+	allkeys := make([][]byte, size)
+	for i := 0; i < size; i++ {
+		key := cmn.RandStr(20)
+		value := "value_for_" + key
+		tree.Set([]byte(key), []byte(value))
+		allkeys[i] = []byte(key)
+	}
 
-		key := allkeys[0]
-	*/
-	key := []byte{0xca, 0xfe}
-	val := []byte{0xde, 0xad, 0xbe, 0xef}
-	tree.Set(key, val)
+	key := allkeys[0]
+	// key := []byte{0xca, 0xfe}
+	// val := []byte{0xde, 0xad, 0xbe, 0xef}
+	// tree.Set(key, val)
 
 	value, proof, err := tree.GetWithProof(key)
 	if err != nil {
@@ -69,9 +68,6 @@ func generateRangeProof(size int) (*provenValue, error) {
 	}
 	if value == nil {
 		return nil, fmt.Errorf("GetWithProof returned nil value")
-	}
-	if !bytes.Equal(value, val) {
-		return nil, fmt.Errorf("Wrote %X got value %X", val, value)
 	}
 	if len(proof.Leaves) != 1 {
 		return nil, fmt.Errorf("GetWithProof returned %d leaves", len(proof.Leaves))
