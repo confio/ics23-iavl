@@ -18,9 +18,6 @@ func ConvertExistenceProof(p *iavl.RangeProof, key, value []byte) (*proofs.Exist
 	}
 
 	leaf := convertLeafOp(p.Leaves[0].Version)
-	leafHash := p.Leaves[0].Hash()
-	fmt.Printf("leaf hash: %X\n", leafHash)
-
 	inner := convertInnerOps(p.LeftPath)
 	// prepend leaf
 	steps := append([]*proofs.ProofOp{leaf}, inner...)
@@ -45,13 +42,15 @@ func convertLeafOp(version int64) *proofs.ProofOp {
 		Length:       proofs.LengthOp_VAR_PROTO,
 		Prefix:       prefix,
 	}
-	fmt.Printf("Leaf: %#v\n", leaf)
 	return proofs.WrapLeaf(leaf)
 }
 
 // we cannot get the proofInnerNode type, so we need to do the whole path in one function
 func convertInnerOps(path iavl.PathToLeaf) []*proofs.ProofOp {
 	steps := make([]*proofs.ProofOp, 0, len(path))
+
+	// lengthByte is the length prefix prepended to each of the sha256 sub-hashes
+	var lengthByte byte = 0x20
 
 	// we need to go in reverse order, iavl starts from root to leaf,
 	// we want to go up from the leaf to the root
@@ -63,10 +62,20 @@ func convertInnerOps(path iavl.PathToLeaf) []*proofs.ProofOp {
 
 		var suffix []byte
 		if len(path[i].Left) > 0 {
+			// length prefixed left side
+			prefix = append(prefix, lengthByte)
 			prefix = append(prefix, path[i].Left...)
+			// prepend the length prefix for child
+			prefix = append(prefix, lengthByte)
 		} else {
-			suffix = path[i].Right
+			// prepend the length prefix for child
+			prefix = append(prefix, lengthByte)
+			// length-prefixed right side
+			suffix = []byte{lengthByte}
+			suffix = append(suffix, path[i].Right...)
 		}
+
+		path[i].Hash([]byte{0x80, 0x08})
 
 		op := &proofs.InnerOp{
 			Hash:   proofs.HashOp_SHA256,
@@ -76,7 +85,6 @@ func convertInnerOps(path iavl.PathToLeaf) []*proofs.ProofOp {
 		wrapped := proofs.WrapInner(op)
 		steps = append(steps, wrapped)
 	}
-
 	return steps
 }
 

@@ -11,20 +11,16 @@ import (
 )
 
 func TestConvertProof(t *testing.T) {
-	proof, err := generateRangeProof(1)
+	proof, err := generateRangeProof(6)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	fmt.Println(proof.proof.String())
-	fmt.Printf("Root: %X\n", proof.rootHash)
 
 	converted, err := ConvertExistenceProof(proof.proof, proof.key, proof.value)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fmt.Printf("\n\n%#v\n", converted)
 	calc, err := converted.Calculate()
 	if err != nil {
 		t.Fatal(err)
