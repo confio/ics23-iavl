@@ -75,8 +75,6 @@ func convertInnerOps(path iavl.PathToLeaf) []*proofs.ProofOp {
 			suffix = append(suffix, path[i].Right...)
 		}
 
-		path[i].Hash([]byte{0x80, 0x08})
-
 		op := &proofs.InnerOp{
 			Hash:   proofs.HashOp_SHA256,
 			Prefix: prefix,
