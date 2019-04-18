@@ -2,21 +2,16 @@ package iavlproofs
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
-
-	"github.com/tendermint/iavl"
-	cmn "github.com/tendermint/tendermint/libs/common"
-	"github.com/tendermint/tendermint/libs/db"
 )
 
 func TestConvertProof(t *testing.T) {
-	proof, err := generateRangeProof(200)
+	proof, err := GenerateRangeProof(200)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	converted, err := ConvertExistenceProof(proof.proof, proof.key, proof.value)
+	converted, err := ConvertExistenceProof(proof.Proof, proof.Key, proof.Value)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,55 +21,7 @@ func TestConvertProof(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !bytes.Equal(calc, proof.rootHash) {
-		t.Errorf("Calculated: %X\nExpected:   %X", calc, proof.rootHash)
+	if !bytes.Equal(calc, proof.RootHash) {
+		t.Errorf("Calculated: %X\nExpected:   %X", calc, proof.RootHash)
 	}
-}
-
-type provenValue struct {
-	key      []byte
-	value    []byte
-	proof    *iavl.RangeProof
-	rootHash []byte
-}
-
-// generateRangeProof makes a tree of size and returns a range proof for one random element
-//
-// returns a range proof and the root hash of the tree
-func generateRangeProof(size int) (*provenValue, error) {
-	tree := iavl.NewMutableTree(db.NewMemDB(), 0)
-
-	// insert lots of info and store the bytes
-	allkeys := make([][]byte, size)
-	for i := 0; i < size; i++ {
-		key := cmn.RandStr(20)
-		value := "value_for_" + key
-		tree.Set([]byte(key), []byte(value))
-		allkeys[i] = []byte(key)
-	}
-
-	key := allkeys[0]
-	// key := []byte{0xca, 0xfe}
-	// val := []byte{0xde, 0xad, 0xbe, 0xef}
-	// tree.Set(key, val)
-
-	value, proof, err := tree.GetWithProof(key)
-	if err != nil {
-		return nil, err
-	}
-	if value == nil {
-		return nil, fmt.Errorf("GetWithProof returned nil value")
-	}
-	if len(proof.Leaves) != 1 {
-		return nil, fmt.Errorf("GetWithProof returned %d leaves", len(proof.Leaves))
-	}
-	root := tree.WorkingHash()
-
-	res := &provenValue{
-		key:      key,
-		value:    value,
-		proof:    proof,
-		rootHash: root,
-	}
-	return res, nil
 }
