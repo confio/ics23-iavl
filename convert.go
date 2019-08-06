@@ -19,35 +19,33 @@ func ConvertExistenceProof(p *iavl.RangeProof, key, value []byte) (*proofs.Exist
 
 	leaf := convertLeafOp(p.Leaves[0].Version)
 	inner := convertInnerOps(p.LeftPath)
-	// prepend leaf
-	steps := append([]*proofs.ProofOp{leaf}, inner...)
 
 	proof := &proofs.ExistenceProof{
 		Key:   key,
 		Value: value,
-		Steps: steps,
+		Leaf:  leaf,
+		Path:  inner,
 	}
 	return proof, nil
 }
 
-func convertLeafOp(version int64) *proofs.ProofOp {
+func convertLeafOp(version int64) *proofs.LeafOp {
 	// this is adapted from iavl/proof.go:proofLeafNode.Hash()
 	prefix := aminoVarInt(0)
 	prefix = append(prefix, aminoVarInt(1)...)
 	prefix = append(prefix, aminoVarInt(version)...)
 
-	leaf := &proofs.LeafOp{
+	return &proofs.LeafOp{
 		Hash:         proofs.HashOp_SHA256,
 		PrehashValue: proofs.HashOp_SHA256,
 		Length:       proofs.LengthOp_VAR_PROTO,
 		Prefix:       prefix,
 	}
-	return proofs.WrapLeaf(leaf)
 }
 
 // we cannot get the proofInnerNode type, so we need to do the whole path in one function
-func convertInnerOps(path iavl.PathToLeaf) []*proofs.ProofOp {
-	steps := make([]*proofs.ProofOp, 0, len(path))
+func convertInnerOps(path iavl.PathToLeaf) []*proofs.InnerOp {
+	steps := make([]*proofs.InnerOp, 0, len(path))
 
 	// lengthByte is the length prefix prepended to each of the sha256 sub-hashes
 	var lengthByte byte = 0x20
@@ -80,8 +78,7 @@ func convertInnerOps(path iavl.PathToLeaf) []*proofs.ProofOp {
 			Prefix: prefix,
 			Suffix: suffix,
 		}
-		wrapped := proofs.WrapInner(op)
-		steps = append(steps, wrapped)
+		steps = append(steps, op)
 	}
 	return steps
 }

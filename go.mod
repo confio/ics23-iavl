@@ -1,11 +1,11 @@
 module github.com/confio/proofs-iavl
 
 require (
-	github.com/confio/proofs v0.0.0-20190415200806-c03ae4cbaacd
+	github.com/confio/proofs v0.2.0
+	github.com/confio/proofs/go v0.0.0-20190805152205-de743e64f0fb
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-kit/kit v0.8.0 // indirect
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
-	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/google/pprof v0.0.0-20190404155422-f8f10df84213 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
