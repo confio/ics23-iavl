@@ -11,5 +11,12 @@ jobs:
     working_directory: ~/iavl
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
       - run: make build
       - run: make test
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
