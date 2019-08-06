@@ -4,10 +4,10 @@
 export GO111MODULE := on
 
 build:
-	go build ./cmd/testgen-iavl
+	go build -mod=readonly ./cmd/testgen-iavl
 
 test:
-	go test .
+	go test -mod=readonly .
 
 testgen:
-	go run ./cmd/testgen-iavl
+	go run -mod=readonly ./cmd/testgen-iavl
