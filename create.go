@@ -66,6 +66,7 @@ func CreateNonMembershipProof(tree *iavl.MutableTree, key []byte) (*proofs.Commi
 }
 
 func createExistenceProof(tree *iavl.MutableTree, key []byte) (*proofs.ExistenceProof, error) {
+	fmt.Printf("%x\n", key)
 	value, proof, err := tree.GetWithProof(key)
 	if err != nil {
 		return nil, err
