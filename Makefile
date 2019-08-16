@@ -1,5 +1,7 @@
 .PHONY: build test testgen
 
+GENDIR ?= ./testdata
+
 # make sure we turn on go modules
 export GO111MODULE := on
 
@@ -10,4 +12,11 @@ test:
 	go test -mod=readonly .
 
 testgen:
-	go run -mod=readonly ./cmd/testgen-iavl
+	# Usage: GENDIR=CONFIO/PROOFS/testdata/iavl make testgen
+	@mkdir -p "$(GENDIR)"
+	go run -mod=readonly ./cmd/testgen-iavl exist left 987 > "$(GENDIR)"/exist_left.json
+	go run -mod=readonly ./cmd/testgen-iavl exist middle 812 > "$(GENDIR)"/exist_middle.json
+	go run -mod=readonly ./cmd/testgen-iavl exist right 1261 > "$(GENDIR)"/exist_right.json
+	go run -mod=readonly ./cmd/testgen-iavl nonexist left 813 > "$(GENDIR)"/nonexist_left.json
+	go run -mod=readonly ./cmd/testgen-iavl nonexist middle 691 > "$(GENDIR)"/nonexist_middle.json
+	go run -mod=readonly ./cmd/testgen-iavl nonexist right 1535 > "$(GENDIR)"/nonexist_right.json
