@@ -18,23 +18,13 @@ type IavlResult struct {
 	RootHash []byte
 }
 
-// IavlResult is the result for a non-existence proof
-type IavlNoResult struct {
-	Key   []byte
-	Left  *IavlResult
-	Right *IavlResult
-}
-
 // generateIavlResult makes a tree of size and returns a range proof for one random element
 //
 // returns a range proof and the root hash of the tree
-func generateIavlResult(size int) (*IavlResult, error) {
+func generateIavlResult(size int, loc where) (*IavlResult, error) {
 	tree, allkeys := buildTree(size)
-	key := allkeys[7]
-	return iavlResult(tree, key)
-}
+	key := getKey(allkeys, loc)
 
-func iavlResult(tree *iavl.MutableTree, key []byte) (*IavlResult, error) {
 	value, proof, err := tree.GetWithProof(key)
 	if err != nil {
 		return nil, err
@@ -64,50 +54,32 @@ const (
 	middle
 )
 
-// generateIavlNoResult makes a tree of size and returns a range proof
-// showing one element is not in the tree
-func generateIavlNoResult(size int, loc where) (*IavlNoResult, error) {
-	tree, allkeys := buildTree(size)
-	var leftkey, rightkey, key []byte
-
+// this returns a key, on left/right/middle
+func getKey(allkeys [][]byte, loc where) []byte {
 	if loc == left {
-		leftkey = nil
-		rightkey = allkeys[0]
-		key = []byte{0, 0, 0, 1}
-	} else if loc == right {
-		leftkey = allkeys[len(allkeys)-1]
-		rightkey = nil
-		key = []byte{255, 255, 255, 255}
+		return allkeys[0]
+	}
+	if loc == right {
+		return allkeys[len(allkeys)-1]
+	}
+	// select a random index between 1 and allkeys-2
+	idx := cmn.RandInt()%(len(allkeys)-2) + 1
+	return allkeys[idx]
+}
 
-	} else {
-		leftkey = allkeys[13]
-		rightkey = allkeys[14]
-		key = append([]byte{}, leftkey...)
-		key[18] = 255
-		key[19] = 255
+// this returns a missing key - left of all, right of all, or in the middle
+func getNonKey(allkeys [][]byte, loc where) []byte {
+	if loc == left {
+		return []byte{0, 0, 0, 1}
 	}
-
-	var left, right *IavlResult
-	var err error
-	if len(leftkey) > 0 {
-		left, err = iavlResult(tree, leftkey)
-		if err != nil {
-			return nil, err
-		}
+	if loc == right {
+		return []byte{0xff, 0xff, 0xff, 0xff}
 	}
-	if len(rightkey) > 0 {
-		right, err = iavlResult(tree, rightkey)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	res := &IavlNoResult{
-		Key:   key,
-		Left:  left,
-		Right: right,
-	}
-	return res, nil
+	// otherwise, next to an existing key (copy before mod)
+	key := append([]byte{}, getKey(allkeys, loc)...)
+	key[len(key)-2] = 255
+	key[len(key)-1] = 255
+	return key
 }
 
 // creates random key/values and stores in tree
