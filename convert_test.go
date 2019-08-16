@@ -3,10 +3,12 @@ package iavlproofs
 import (
 	"bytes"
 	"testing"
+
+	"github.com/confio/proofs-iavl/helpers"
 )
 
 func TestConvertExistence(t *testing.T) {
-	proof, err := generateIavlResult(200, middle)
+	proof, err := helpers.GenerateIavlResult(200, helpers.Middle)
 	if err != nil {
 		t.Fatal(err)
 	}

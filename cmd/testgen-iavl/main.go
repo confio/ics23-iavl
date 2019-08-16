@@ -9,6 +9,8 @@ import (
 	"sort"
 
 	iavlproofs "github.com/confio/proofs-iavl"
+	"github.com/confio/proofs-iavl/helpers"
+
 	"github.com/tendermint/iavl"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	db "github.com/tendermint/tm-db"
@@ -25,7 +27,7 @@ this will be an auto-generated existence proof in the form:
 **/
 
 func main() {
-	tree, keys := buildTree(400)
+	tree, keys := helpers.BuildTree(400)
 	root := tree.WorkingHash()
 
 	// TODO: allow exist/nonexist, left/right/center

@@ -1,4 +1,9 @@
-package iavlproofs
+/*
+Package helpers contains functions to build sample data for tests/testgen
+
+In it's own package to avoid poluting the godoc for proofs-iavl
+*/
+package helpers
 
 import (
 	"bytes"
@@ -18,12 +23,12 @@ type IavlResult struct {
 	RootHash []byte
 }
 
-// generateIavlResult makes a tree of size and returns a range proof for one random element
+// GenerateIavlResult makes a tree of size and returns a range proof for one random element
 //
 // returns a range proof and the root hash of the tree
-func generateIavlResult(size int, loc where) (*IavlResult, error) {
-	tree, allkeys := buildTree(size)
-	key := getKey(allkeys, loc)
+func GenerateIavlResult(size int, loc Where) (*IavlResult, error) {
+	tree, allkeys := BuildTree(size)
+	key := GetKey(allkeys, loc)
 
 	value, proof, err := tree.GetWithProof(key)
 	if err != nil {
@@ -46,20 +51,21 @@ func generateIavlResult(size int, loc where) (*IavlResult, error) {
 	return res, nil
 }
 
-type where int
+// Where selects a location for a key - Left, Right, or Middle
+type Where int
 
 const (
-	left where = iota
-	right
-	middle
+	Left Where = iota
+	Right
+	Middle
 )
 
-// this returns a key, on left/right/middle
-func getKey(allkeys [][]byte, loc where) []byte {
-	if loc == left {
+// GetKey this returns a key, on Left/Right/Middle
+func GetKey(allkeys [][]byte, loc Where) []byte {
+	if loc == Left {
 		return allkeys[0]
 	}
-	if loc == right {
+	if loc == Right {
 		return allkeys[len(allkeys)-1]
 	}
 	// select a random index between 1 and allkeys-2
@@ -67,24 +73,24 @@ func getKey(allkeys [][]byte, loc where) []byte {
 	return allkeys[idx]
 }
 
-// this returns a missing key - left of all, right of all, or in the middle
-func getNonKey(allkeys [][]byte, loc where) []byte {
-	if loc == left {
+// GetNonKey returns a missing key - Left of all, Right of all, or in the Middle
+func GetNonKey(allkeys [][]byte, loc Where) []byte {
+	if loc == Left {
 		return []byte{0, 0, 0, 1}
 	}
-	if loc == right {
+	if loc == Right {
 		return []byte{0xff, 0xff, 0xff, 0xff}
 	}
 	// otherwise, next to an existing key (copy before mod)
-	key := append([]byte{}, getKey(allkeys, loc)...)
+	key := append([]byte{}, GetKey(allkeys, loc)...)
 	key[len(key)-2] = 255
 	key[len(key)-1] = 255
 	return key
 }
 
-// creates random key/values and stores in tree
+// BuildTree creates random key/values and stores in tree
 // returns a list of all keys in sorted order
-func buildTree(size int) (tree *iavl.MutableTree, keys [][]byte) {
+func BuildTree(size int) (tree *iavl.MutableTree, keys [][]byte) {
 	tree = iavl.NewMutableTree(db.NewMemDB(), 0)
 
 	// insert lots of info and store the bytes
