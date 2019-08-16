@@ -1,19 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
-	"sort"
+	"strconv"
 
 	iavlproofs "github.com/confio/proofs-iavl"
 	"github.com/confio/proofs-iavl/helpers"
-
-	"github.com/tendermint/iavl"
-	cmn "github.com/tendermint/tendermint/libs/common"
-	db "github.com/tendermint/tm-db"
+	proofs "github.com/confio/proofs/go"
 )
 
 /**
@@ -22,18 +18,41 @@ this will be an auto-generated existence proof in the form:
 
 {
 	"root": "<hex encoded root hash of tree>",
-	"existence": "<hex encoded protobuf marshaling of an existence proof>"
+	"key": "<hex encoded key to prove>",
+	"value": "<hex encoded value to prove> (empty on non-existence)",
+	"proof": "<hex encoded protobuf marshaling of a CommitmentProof>"
 }
+
+It accepts two or three arguments (optional size: default 400)
+
+testgen-iavl [exist|nonexist] [left|right|middle] <size>
 **/
 
 func main() {
-	tree, keys := helpers.BuildTree(400)
+	exist, loc, size, err := parseArgs(os.Args)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		fmt.Println("Usage: testgen-iavl [exist|nonexist] [left|right|middle] <size>")
+		os.Exit(1)
+	}
+
+	tree, allkeys := helpers.BuildTree(size)
 	root := tree.WorkingHash()
 
-	// TODO: allow exist/nonexist, left/right/center
-	key := keys[87]
+	var key, value []byte
+	if exist {
+		key = helpers.GetKey(allkeys, loc)
+		_, value = tree.Get(key)
+	} else {
+		key = helpers.GetNonKey(allkeys, loc)
+	}
 
-	proof, err := iavlproofs.CreateMembershipProof(tree, key)
+	var proof *proofs.CommitmentProof
+	if exist {
+		proof, err = iavlproofs.CreateMembershipProof(tree, key)
+	} else {
+		proof, err = iavlproofs.CreateNonMembershipProof(tree, key)
+	}
 	if err != nil {
 		fmt.Printf("Error: create proof: %+v\n", err)
 		os.Exit(1)
@@ -46,8 +65,10 @@ func main() {
 	}
 
 	res := map[string]interface{}{
-		"root":      hex.EncodeToString(root),
-		"existence": hex.EncodeToString(binary),
+		"root":  hex.EncodeToString(root),
+		"key":   hex.EncodeToString(key),
+		"value": hex.EncodeToString(value),
+		"proof": hex.EncodeToString(binary),
 	}
 	out, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
@@ -56,4 +77,40 @@ func main() {
 	}
 
 	fmt.Println(string(out))
+}
+
+func parseArgs(args []string) (exist bool, loc helpers.Where, size int, err error) {
+	if len(args) != 3 && len(args) != 4 {
+		err = fmt.Errorf("Insufficient args")
+		return
+	}
+
+	switch args[1] {
+	case "exist":
+		exist = true
+	case "nonexist":
+		exist = false
+	default:
+		err = fmt.Errorf("Invalid arg: %s", args[1])
+		return
+	}
+
+	switch args[2] {
+	case "left":
+		loc = helpers.Left
+	case "middle":
+		loc = helpers.Middle
+	case "right":
+		loc = helpers.Right
+	default:
+		err = fmt.Errorf("Invalid arg: %s", args[2])
+		return
+	}
+
+	size = 400
+	if len(args) == 4 {
+		size, err = strconv.Atoi(args[3])
+	}
+
+	return
 }
