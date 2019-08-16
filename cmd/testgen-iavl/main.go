@@ -57,23 +57,3 @@ func main() {
 
 	fmt.Println(string(out))
 }
-
-// creates random key/values and stores in tree
-// returns a list of all keys in sorted order
-func buildTree(size int) (tree *iavl.MutableTree, keys [][]byte) {
-	tree = iavl.NewMutableTree(db.NewMemDB(), 0)
-
-	// insert lots of info and store the bytes
-	keys = make([][]byte, size)
-	for i := 0; i < size; i++ {
-		key := cmn.RandStr(20)
-		value := "value_for_" + key
-		tree.Set([]byte(key), []byte(value))
-		keys[i] = []byte(key)
-	}
-	sort.Slice(keys, func(i, j int) bool {
-		return bytes.Compare(keys[i], keys[j]) < 0
-	})
-
-	return tree, keys
-}
