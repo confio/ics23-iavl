@@ -3,15 +3,17 @@ package iavlproofs
 import (
 	"bytes"
 	"testing"
+
+	"github.com/confio/proofs-iavl/helpers"
 )
 
-func TestConvertProof(t *testing.T) {
-	proof, err := GenerateRangeProof(200)
+func TestConvertExistence(t *testing.T) {
+	proof, err := helpers.GenerateIavlResult(200, helpers.Middle)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	converted, err := ConvertExistenceProof(proof.Proof, proof.Key, proof.Value)
+	converted, err := convertExistenceProof(proof.Proof, proof.Key, proof.Value)
 	if err != nil {
 		t.Fatal(err)
 	}

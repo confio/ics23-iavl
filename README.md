@@ -5,15 +5,19 @@ specified in confio/proofs and validating that they still work.
 
 ## Library usage
 
-It exposes a top-level function `func ConvertExistenceProof(p *iavl.RangeProof, key, value []byte) (*proofs.ExistenceProof, error)`
-that can convert from iavl range proofs into confio/proof protobuf objects.
+It exposes a two main functions :
 
-It currently only works for existence proofs, eg. RangeProofs that prove the existence of *exactly one* item.
+`func CreateMembershipProof(tree *iavl.MutableTree, key []byte) (*proofs.CommitmentProof, error)`
+produces a CommitmentProof that the given key exists in the iavl tree (and contains the
+current value). This returns an error if the key does not exist in the tree.
 
-We plan to soon support non-existence proofs.
+`func CreateNonMembershipProof(tree *iavl.MutableTree, key []byte) (*proofs.CommitmentProof, error)`
+produces a CommitmentProof that the given key doesn't exist in the iavl tree. 
+This returns an error if the key does not exist in the tree.
 
 Generalized range proofs are lower in priority, as they are just an optimization of the
 two basic proof types, and don't provide any additional capabilities.
+We will soon add some `Batch` capabilities that can represent these.
 
 ## CLI usage
 

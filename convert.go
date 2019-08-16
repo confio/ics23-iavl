@@ -7,26 +7,21 @@ import (
 	"github.com/tendermint/iavl"
 )
 
-// ConvertExistenceProof will convert the given proof into a valid
+// convertExistenceProof will convert the given proof into a valid
 // existence proof, if that's what it is.
 //
 // This is the simplest case of the range proof and we will focus on
 // demoing compatibility here
-func ConvertExistenceProof(p *iavl.RangeProof, key, value []byte) (*proofs.ExistenceProof, error) {
+func convertExistenceProof(p *iavl.RangeProof, key, value []byte) (*proofs.ExistenceProof, error) {
 	if len(p.Leaves) != 1 {
 		return nil, fmt.Errorf("Existence proof requires RangeProof to have exactly one leaf")
 	}
-
-	leaf := convertLeafOp(p.Leaves[0].Version)
-	inner := convertInnerOps(p.LeftPath)
-
-	proof := &proofs.ExistenceProof{
+	return &proofs.ExistenceProof{
 		Key:   key,
 		Value: value,
-		Leaf:  leaf,
-		Path:  inner,
-	}
-	return proof, nil
+		Leaf:  convertLeafOp(p.Leaves[0].Version),
+		Path:  convertInnerOps(p.LeftPath),
+	}, nil
 }
 
 func convertLeafOp(version int64) *proofs.LeafOp {
