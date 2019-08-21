@@ -7,6 +7,22 @@ import (
 	"github.com/tendermint/iavl"
 )
 
+// IavlSpec constrains the format from proofs-iavl (iavl merkle proofs)
+var IavlSpec = &proofs.ProofSpec{
+	LeafSpec: &proofs.LeafOp{
+		Prefix:       []byte{0},
+		Hash:         proofs.HashOp_SHA256,
+		PrehashValue: proofs.HashOp_SHA256,
+		Length:       proofs.LengthOp_VAR_PROTO,
+	},
+	InnerSpec: &proofs.InnerSpec{
+		ChildOrder:      []int32{0, 1},
+		MinPrefixLength: 4,
+		MaxPrefixLength: 12,
+		ChildSize:       33, // (with length byte)
+	},
+}
+
 /*
 CreateMembershipProof will produce a CommitmentProof that the given key (and queries value) exists in the iavl tree.
 If the key doesn't exist in the tree, this will return an error.

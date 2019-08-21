@@ -31,7 +31,7 @@ func TestCreateMembership(t *testing.T) {
 			}
 
 			root := tree.WorkingHash()
-			valid := proofs.VerifyMembership(proofs.IavlSpec, root, proof, key, val)
+			valid := proofs.VerifyMembership(IavlSpec, root, proof, key, val)
 			if !valid {
 				t.Fatalf("Membership Proof Invalid")
 			}
@@ -63,7 +63,7 @@ func TestCreateNonMembership(t *testing.T) {
 			}
 
 			root := tree.WorkingHash()
-			valid := proofs.VerifyNonMembership(proofs.IavlSpec, root, proof, key)
+			valid := proofs.VerifyNonMembership(IavlSpec, root, proof, key)
 			if !valid {
 				t.Fatalf("Non Membership Proof Invalid")
 			}
