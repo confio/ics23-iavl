@@ -7,9 +7,9 @@ import (
 	"os"
 	"strconv"
 
-	iavlproofs "github.com/confio/proofs-iavl"
-	"github.com/confio/proofs-iavl/helpers"
-	proofs "github.com/confio/proofs/go"
+	iavlproofs "github.com/confio/ics23-iavl"
+	"github.com/confio/ics23-iavl/helpers"
+	ics23 "github.com/confio/ics23/go"
 )
 
 /**
@@ -47,7 +47,7 @@ func main() {
 		key = helpers.GetNonKey(allkeys, loc)
 	}
 
-	var proof *proofs.CommitmentProof
+	var proof *ics23.CommitmentProof
 	if exist {
 		proof, err = iavlproofs.CreateMembershipProof(tree, key)
 	} else {
