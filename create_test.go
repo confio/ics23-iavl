@@ -3,8 +3,8 @@ package iavlproofs
 import (
 	"testing"
 
-	"github.com/confio/proofs-iavl/helpers"
-	proofs "github.com/confio/proofs/go"
+	"github.com/confio/ics23-iavl/helpers"
+	ics23 "github.com/confio/ics23/go"
 )
 
 func TestCreateMembership(t *testing.T) {
@@ -31,7 +31,7 @@ func TestCreateMembership(t *testing.T) {
 			}
 
 			root := tree.WorkingHash()
-			valid := proofs.VerifyMembership(IavlSpec, root, proof, key, val)
+			valid := ics23.VerifyMembership(IavlSpec, root, proof, key, val)
 			if !valid {
 				t.Fatalf("Membership Proof Invalid")
 			}
@@ -63,7 +63,7 @@ func TestCreateNonMembership(t *testing.T) {
 			}
 
 			root := tree.WorkingHash()
-			valid := proofs.VerifyNonMembership(IavlSpec, root, proof, key)
+			valid := ics23.VerifyNonMembership(IavlSpec, root, proof, key)
 			if !valid {
 				t.Fatalf("Non Membership Proof Invalid")
 			}

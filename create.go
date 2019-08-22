@@ -3,19 +3,19 @@ package iavlproofs
 import (
 	"fmt"
 
-	proofs "github.com/confio/proofs/go"
+	ics23 "github.com/confio/ics23/go"
 	"github.com/tendermint/iavl"
 )
 
-// IavlSpec constrains the format from proofs-iavl (iavl merkle proofs)
-var IavlSpec = &proofs.ProofSpec{
-	LeafSpec: &proofs.LeafOp{
+// IavlSpec constrains the format from ics23-iavl (iavl merkle ics23)
+var IavlSpec = &ics23.ProofSpec{
+	LeafSpec: &ics23.LeafOp{
 		Prefix:       []byte{0},
-		Hash:         proofs.HashOp_SHA256,
-		PrehashValue: proofs.HashOp_SHA256,
-		Length:       proofs.LengthOp_VAR_PROTO,
+		Hash:         ics23.HashOp_SHA256,
+		PrehashValue: ics23.HashOp_SHA256,
+		Length:       ics23.LengthOp_VAR_PROTO,
 	},
-	InnerSpec: &proofs.InnerSpec{
+	InnerSpec: &ics23.InnerSpec{
 		ChildOrder:      []int32{0, 1},
 		MinPrefixLength: 4,
 		MaxPrefixLength: 12,
@@ -27,13 +27,13 @@ var IavlSpec = &proofs.ProofSpec{
 CreateMembershipProof will produce a CommitmentProof that the given key (and queries value) exists in the iavl tree.
 If the key doesn't exist in the tree, this will return an error.
 */
-func CreateMembershipProof(tree *iavl.MutableTree, key []byte) (*proofs.CommitmentProof, error) {
+func CreateMembershipProof(tree *iavl.MutableTree, key []byte) (*ics23.CommitmentProof, error) {
 	exist, err := createExistenceProof(tree, key)
 	if err != nil {
 		return nil, err
 	}
-	proof := &proofs.CommitmentProof{
-		Proof: &proofs.CommitmentProof_Exist{
+	proof := &ics23.CommitmentProof{
+		Proof: &ics23.CommitmentProof_Exist{
 			Exist: exist,
 		},
 	}
@@ -44,7 +44,7 @@ func CreateMembershipProof(tree *iavl.MutableTree, key []byte) (*proofs.Commitme
 CreateNonMembershipProof will produce a CommitmentProof that the given key doesn't exist in the iavl tree.
 If the key exists in the tree, this will return an error.
 */
-func CreateNonMembershipProof(tree *iavl.MutableTree, key []byte) (*proofs.CommitmentProof, error) {
+func CreateNonMembershipProof(tree *iavl.MutableTree, key []byte) (*ics23.CommitmentProof, error) {
 	// idx is one node right of what we want....
 	idx, val := tree.Get(key)
 	if val != nil {
@@ -52,7 +52,7 @@ func CreateNonMembershipProof(tree *iavl.MutableTree, key []byte) (*proofs.Commi
 	}
 
 	var err error
-	nonexist := &proofs.NonExistenceProof{
+	nonexist := &ics23.NonExistenceProof{
 		Key: key,
 	}
 
@@ -73,15 +73,15 @@ func CreateNonMembershipProof(tree *iavl.MutableTree, key []byte) (*proofs.Commi
 		}
 	}
 
-	proof := &proofs.CommitmentProof{
-		Proof: &proofs.CommitmentProof_Nonexist{
+	proof := &ics23.CommitmentProof{
+		Proof: &ics23.CommitmentProof_Nonexist{
 			Nonexist: nonexist,
 		},
 	}
 	return proof, nil
 }
 
-func createExistenceProof(tree *iavl.MutableTree, key []byte) (*proofs.ExistenceProof, error) {
+func createExistenceProof(tree *iavl.MutableTree, key []byte) (*ics23.ExistenceProof, error) {
 	value, proof, err := tree.GetWithProof(key)
 	if err != nil {
 		return nil, err

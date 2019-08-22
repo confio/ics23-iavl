@@ -3,7 +3,7 @@ package iavlproofs
 import (
 	"fmt"
 
-	proofs "github.com/confio/proofs/go"
+	ics23 "github.com/confio/ics23/go"
 	"github.com/tendermint/iavl"
 )
 
@@ -12,11 +12,11 @@ import (
 //
 // This is the simplest case of the range proof and we will focus on
 // demoing compatibility here
-func convertExistenceProof(p *iavl.RangeProof, key, value []byte) (*proofs.ExistenceProof, error) {
+func convertExistenceProof(p *iavl.RangeProof, key, value []byte) (*ics23.ExistenceProof, error) {
 	if len(p.Leaves) != 1 {
 		return nil, fmt.Errorf("Existence proof requires RangeProof to have exactly one leaf")
 	}
-	return &proofs.ExistenceProof{
+	return &ics23.ExistenceProof{
 		Key:   key,
 		Value: value,
 		Leaf:  convertLeafOp(p.Leaves[0].Version),
@@ -24,23 +24,23 @@ func convertExistenceProof(p *iavl.RangeProof, key, value []byte) (*proofs.Exist
 	}, nil
 }
 
-func convertLeafOp(version int64) *proofs.LeafOp {
+func convertLeafOp(version int64) *ics23.LeafOp {
 	// this is adapted from iavl/proof.go:proofLeafNode.Hash()
 	prefix := aminoVarInt(0)
 	prefix = append(prefix, aminoVarInt(1)...)
 	prefix = append(prefix, aminoVarInt(version)...)
 
-	return &proofs.LeafOp{
-		Hash:         proofs.HashOp_SHA256,
-		PrehashValue: proofs.HashOp_SHA256,
-		Length:       proofs.LengthOp_VAR_PROTO,
+	return &ics23.LeafOp{
+		Hash:         ics23.HashOp_SHA256,
+		PrehashValue: ics23.HashOp_SHA256,
+		Length:       ics23.LengthOp_VAR_PROTO,
 		Prefix:       prefix,
 	}
 }
 
 // we cannot get the proofInnerNode type, so we need to do the whole path in one function
-func convertInnerOps(path iavl.PathToLeaf) []*proofs.InnerOp {
-	steps := make([]*proofs.InnerOp, 0, len(path))
+func convertInnerOps(path iavl.PathToLeaf) []*ics23.InnerOp {
+	steps := make([]*ics23.InnerOp, 0, len(path))
 
 	// lengthByte is the length prefix prepended to each of the sha256 sub-hashes
 	var lengthByte byte = 0x20
@@ -68,8 +68,8 @@ func convertInnerOps(path iavl.PathToLeaf) []*proofs.InnerOp {
 			suffix = append(suffix, path[i].Right...)
 		}
 
-		op := &proofs.InnerOp{
-			Hash:   proofs.HashOp_SHA256,
+		op := &ics23.InnerOp{
+			Hash:   ics23.HashOp_SHA256,
 			Prefix: prefix,
 			Suffix: suffix,
 		}
