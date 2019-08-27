@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/confio/proofs-iavl/helpers"
+	"github.com/confio/ics23-iavl/helpers"
 )
 
 func TestConvertExistence(t *testing.T) {

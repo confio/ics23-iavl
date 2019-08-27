@@ -1,7 +1,7 @@
 /*
 Package helpers contains functions to build sample data for tests/testgen
 
-In it's own package to avoid poluting the godoc for proofs-iavl
+In it's own package to avoid poluting the godoc for ics23-iavl
 */
 package helpers
 
