@@ -20,3 +20,5 @@ testgen:
 	go run -mod=readonly ./cmd/testgen-iavl nonexist left 813 > "$(GENDIR)"/nonexist_left.json
 	go run -mod=readonly ./cmd/testgen-iavl nonexist middle 691 > "$(GENDIR)"/nonexist_middle.json
 	go run -mod=readonly ./cmd/testgen-iavl nonexist right 1535 > "$(GENDIR)"/nonexist_right.json
+	go run -mod=readonly ./cmd/testgen-iavl batch 1801 20 0 > "$(GENDIR)"/batch_exist.json
+	go run -mod=readonly ./cmd/testgen-iavl batch 1807 0 20 > "$(GENDIR)"/batch_nonexist.json
