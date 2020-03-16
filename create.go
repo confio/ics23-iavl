@@ -20,6 +20,7 @@ var IavlSpec = &ics23.ProofSpec{
 		MinPrefixLength: 4,
 		MaxPrefixLength: 12,
 		ChildSize:       33, // (with length byte)
+		Hash:            ics23.HashOp_SHA256,
 	},
 }
 
