@@ -22,7 +22,10 @@ func TestCreateMembership(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			tree, allkeys := helpers.BuildTree(tc.size)
+			tree, allkeys, err := helpers.BuildTree(tc.size)
+			if err != nil {
+				t.Fatalf("Creating tree: %+v", err)
+			}
 			key := helpers.GetKey(allkeys, tc.loc)
 			_, val := tree.Get(key)
 			proof, err := CreateMembershipProof(tree, key)
@@ -54,7 +57,10 @@ func TestCreateNonMembership(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			tree, allkeys := helpers.BuildTree(tc.size)
+			tree, allkeys, err := helpers.BuildTree(tc.size)
+			if err != nil {
+				t.Fatalf("Creating tree: %+v", err)
+			}
 			key := helpers.GetNonKey(allkeys, tc.loc)
 
 			proof, err := CreateNonMembershipProof(tree, key)

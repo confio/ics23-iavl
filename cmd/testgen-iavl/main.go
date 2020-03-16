@@ -61,7 +61,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	tree, allkeys := helpers.BuildTree(size)
+	tree, allkeys, err := helpers.BuildTree(size)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		fmt.Println("Usage: testgen-iavl [exist|nonexist] [left|right|middle] <size>")
+		os.Exit(1)
+	}
 	root := tree.WorkingHash()
 
 	var key, value []byte
@@ -151,7 +156,10 @@ func doBatch(args []string) error {
 		return err
 	}
 
-	tree, allkeys := helpers.BuildTree(size)
+	tree, allkeys, err := helpers.BuildTree(size)
+	if err != nil {
+		return err
+	}
 	root := tree.WorkingHash()
 
 	items := []item{}

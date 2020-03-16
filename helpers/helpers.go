@@ -11,7 +11,7 @@ import (
 	"sort"
 
 	"github.com/tendermint/iavl"
-	cmn "github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/rand"
 	db "github.com/tendermint/tm-db"
 )
 
@@ -27,7 +27,10 @@ type IavlResult struct {
 //
 // returns a range proof and the root hash of the tree
 func GenerateIavlResult(size int, loc Where) (*IavlResult, error) {
-	tree, allkeys := BuildTree(size)
+	tree, allkeys, err := BuildTree(size)
+	if err != nil {
+		return nil, err
+	}
 	key := GetKey(allkeys, loc)
 
 	value, proof, err := tree.GetWithProof(key)
@@ -69,7 +72,7 @@ func GetKey(allkeys [][]byte, loc Where) []byte {
 		return allkeys[len(allkeys)-1]
 	}
 	// select a random index between 1 and allkeys-2
-	idx := cmn.RandInt()%(len(allkeys)-2) + 1
+	idx := rand.Int()%(len(allkeys)-2) + 1
 	return allkeys[idx]
 }
 
@@ -90,13 +93,13 @@ func GetNonKey(allkeys [][]byte, loc Where) []byte {
 
 // BuildTree creates random key/values and stores in tree
 // returns a list of all keys in sorted order
-func BuildTree(size int) (tree *iavl.MutableTree, keys [][]byte) {
-	tree = iavl.NewMutableTree(db.NewMemDB(), 0)
+func BuildTree(size int) (tree *iavl.MutableTree, keys [][]byte, err error) {
+	tree, err = iavl.NewMutableTree(db.NewMemDB(), 0)
 
 	// insert lots of info and store the bytes
 	keys = make([][]byte, size)
 	for i := 0; i < size; i++ {
-		key := cmn.RandStr(20)
+		key := rand.Str(20)
 		value := "value_for_" + key
 		tree.Set([]byte(key), []byte(value))
 		keys[i] = []byte(key)
@@ -105,5 +108,5 @@ func BuildTree(size int) (tree *iavl.MutableTree, keys [][]byte) {
 		return bytes.Compare(keys[i], keys[j]) < 0
 	})
 
-	return tree, keys
+	return tree, keys, nil
 }
